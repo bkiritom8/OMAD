@@ -18,6 +18,7 @@
 		AA0101000000000000000009 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001000000000000000009 /* Color+Extensions.swift */; };
 		AA0101000000000000000010 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001000000000000000010 /* NotificationManager.swift */; };
 		AA0101000000000000000011 /* FastingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001000000000000000011 /* FastingManager.swift */; };
+		AA0101000000000000000099 /* HealthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001000000000000000099 /* HealthManager.swift */; };
 		AA0101000000000000000012 /* TodayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001000000000000000012 /* TodayViewModel.swift */; };
 		AA0101000000000000000013 /* TrackerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001000000000000000013 /* TrackerViewModel.swift */; };
 		AA0101000000000000000014 /* FoodCheckerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001000000000000000014 /* FoodCheckerViewModel.swift */; };
@@ -62,6 +63,7 @@
 		AA0001000000000000000009 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
 		AA0001000000000000000010 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		AA0001000000000000000011 /* FastingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingManager.swift; sourceTree = "<group>"; };
+		AA0001000000000000000099 /* HealthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthManager.swift; sourceTree = "<group>"; };
 		AA0001000000000000000012 /* TodayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModel.swift; sourceTree = "<group>"; };
 		AA0001000000000000000013 /* TrackerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerViewModel.swift; sourceTree = "<group>"; };
 		AA0001000000000000000014 /* FoodCheckerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodCheckerViewModel.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 			children = (
 				AA0001000000000000000010 /* NotificationManager.swift */,
 				AA0001000000000000000011 /* FastingManager.swift */,
+				AA0001000000000000000099 /* HealthManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -349,6 +352,7 @@
 				AA0101000000000000000009 /* Color+Extensions.swift in Sources */,
 				AA0101000000000000000010 /* NotificationManager.swift in Sources */,
 				AA0101000000000000000011 /* FastingManager.swift in Sources */,
+				AA0101000000000000000099 /* HealthManager.swift in Sources */,
 				AA0101000000000000000012 /* TodayViewModel.swift in Sources */,
 				AA0101000000000000000013 /* TrackerViewModel.swift in Sources */,
 				AA0101000000000000000014 /* FoodCheckerViewModel.swift in Sources */,
