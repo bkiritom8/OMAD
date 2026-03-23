@@ -296,13 +296,13 @@ struct ExerciseSegment: View {
                                         Text("\(entry.durationMinutes) min")
                                             .font(.subheadline)
                                             .foregroundStyle(.secondary)
-                                        if showHealthBadges && entry.notes == "Imported from Apple Health" {
+                                        if showHealthBadges && entry.notes.hasPrefix("Imported from Apple Health") {
                                             Image(systemName: "heart.fill")
                                                 .font(.caption2)
                                                 .foregroundStyle(.red)
                                         }
                                     }
-                                    if !entry.notes.isEmpty && entry.notes != "Imported from Apple Health" {
+                                    if !entry.notes.isEmpty && !entry.notes.hasPrefix("Imported from Apple Health") {
                                         Text(entry.notes)
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
@@ -366,9 +366,14 @@ struct ExerciseSegment: View {
             showHealthDeniedAlert = true
             return
         }
-        let newCount = await insertNewWorkouts(from: await healthManager.fetchTodaysWorkouts())
+        let fetched = await healthManager.fetchRecentWorkouts()
+        if fetched.isEmpty {
+            showSyncBanner("No workouts found in Health & Fitness")
+            return
+        }
+        let newCount = insertNewWorkouts(from: fetched)
         if newCount > 0 {
-            showSyncBanner("Synced \(newCount) workout\(newCount == 1 ? "" : "s") from Apple Health")
+            showSyncBanner("Synced \(newCount) workout\(newCount == 1 ? "" : "s") from Health & Fitness")
         } else {
             showSyncBanner("Already up to date")
         }
@@ -378,29 +383,27 @@ struct ExerciseSegment: View {
         guard !isSyncing else { return }
         isSyncing = true
         defer { isSyncing = false }
-        let workouts = await healthManager.fetchTodaysWorkouts()
-        let newCount = await insertNewWorkouts(from: workouts)
+        let fetched = await healthManager.fetchRecentWorkouts()
+        let newCount = insertNewWorkouts(from: fetched)
         if newCount > 0 {
-            showSyncBanner("Synced \(newCount) workout\(newCount == 1 ? "" : "s") from Apple Health")
+            showSyncBanner("Synced \(newCount) workout\(newCount == 1 ? "" : "s") from Health & Fitness")
         }
     }
 
     @discardableResult
-    private func insertNewWorkouts(from workouts: [ExerciseEntry]) async -> Int {
-        let today = Date().startOfDay
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
-        let existing = exerciseEntries.filter { $0.date >= today && $0.date < tomorrow }
+    private func insertNewWorkouts(from workouts: [ExerciseEntry]) -> Int {
+        // Collect UUIDs already stored so we never double-import
+        let existingUUIDs = Set(
+            exerciseEntries
+                .filter { $0.notes.hasPrefix("Imported from Apple Health|") }
+                .compactMap { $0.notes.components(separatedBy: "|").last }
+        )
         var newCount = 0
         for workout in workouts {
-            let isDuplicate = existing.contains { entry in
-                entry.type == workout.type &&
-                abs(entry.durationMinutes - workout.durationMinutes) <= 1 &&
-                abs(entry.date.timeIntervalSince(workout.date)) < 300
-            }
-            if !isDuplicate {
-                modelContext.insert(workout)
-                newCount += 1
-            }
+            let uuid = workout.notes.components(separatedBy: "|").last ?? ""
+            guard !uuid.isEmpty, !existingUUIDs.contains(uuid) else { continue }
+            modelContext.insert(workout)
+            newCount += 1
         }
         if newCount > 0 {
             try? modelContext.save()
