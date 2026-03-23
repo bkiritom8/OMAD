@@ -2,14 +2,27 @@ import Foundation
 import SwiftData
 
 class TodayViewModel: ObservableObject {
-    // MARK: - Targets
-    let calorieTarget: Double = 1680
-    let proteinTarget: Double = 153
-    let fiberTarget: Double   = 41
-    let waterTargetMl: Int    = 2500
+    // MARK: - Targets (read from UserDefaults, fall back to defaults)
+    var calorieTarget: Double {
+        let v = UserDefaults.standard.double(forKey: "dailyCalorieTarget")
+        return v > 0 ? v : 1680
+    }
+    var proteinTarget: Double {
+        let v = UserDefaults.standard.double(forKey: "dailyProteinTarget")
+        return v > 0 ? v : 153
+    }
+    var fiberTarget: Double {
+        let v = UserDefaults.standard.double(forKey: "dailyFiberTarget")
+        return v > 0 ? v : 41
+    }
+    var waterTargetMl: Int {
+        let v = UserDefaults.standard.integer(forKey: "dailyWaterTargetMl")
+        return v > 0 ? v : 2500
+    }
 
     // MARK: - State
     @Published var checkedMealItemIDs: Set<String> = []
+    @Published private var settingsRevision: Int = 0   // bumped when UserDefaults change
 
     private var todayKey: String {
         let formatter = DateFormatter()
@@ -17,8 +30,23 @@ class TodayViewModel: ObservableObject {
         return "checkedItems_\(formatter.string(from: Date()))"
     }
 
+    private var settingsObserver: NSObjectProtocol?
+
     init() {
         loadCheckedItems()
+        settingsObserver = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.settingsRevision += 1
+        }
+    }
+
+    deinit {
+        if let obs = settingsObserver {
+            NotificationCenter.default.removeObserver(obs)
+        }
     }
 
     // MARK: - Persistence

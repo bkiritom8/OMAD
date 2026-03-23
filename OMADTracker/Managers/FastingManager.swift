@@ -37,7 +37,9 @@ class FastingManager: ObservableObject {
     }
 
     var progressFraction: Double {
-        min(elapsedHours / 21.0, 1.0)
+        let target = UserDefaults.standard.integer(forKey: "fastingTargetHours")
+        let hours = target > 0 ? Double(target) : 21.0
+        return min(elapsedHours / hours, 1.0)
     }
 
     var fastingColor: Color {
@@ -47,10 +49,15 @@ class FastingManager: ObservableObject {
     var eatingWindowMessage: String {
         let now = Date()
         let cal = Calendar.current
+        let ud = UserDefaults.standard
         var open = cal.dateComponents([.year, .month, .day], from: now)
-        open.hour = 13; open.minute = 0; open.second = 0
+        open.hour   = ud.object(forKey: "mealWindowOpenHour")   != nil ? ud.integer(forKey: "mealWindowOpenHour")   : 13
+        open.minute = ud.object(forKey: "mealWindowOpenMinute") != nil ? ud.integer(forKey: "mealWindowOpenMinute") : 0
+        open.second = 0
         var closeComps = cal.dateComponents([.year, .month, .day], from: now)
-        closeComps.hour = 14; closeComps.minute = 0; closeComps.second = 0
+        closeComps.hour   = ud.object(forKey: "mealWindowCloseHour")   != nil ? ud.integer(forKey: "mealWindowCloseHour")   : 14
+        closeComps.minute = ud.object(forKey: "mealWindowCloseMinute") != nil ? ud.integer(forKey: "mealWindowCloseMinute") : 0
+        closeComps.second = 0
 
         guard let openTime  = cal.date(from: open),
               let closeTime = cal.date(from: closeComps) else {
@@ -72,10 +79,16 @@ class FastingManager: ObservableObject {
         }
     }
 
-    /// Motivational tip shown when in the optimal fat-burning window (18–21h).
+    /// Motivational tip shown when in the optimal fat-burning window (18–target h).
     var fastingTip: String? {
-        guard elapsedHours >= 18 && elapsedHours < 21 else { return nil }
-        return "You're in the optimal fat-burning window. Open your eating window at 1 PM."
+        let target = UserDefaults.standard.integer(forKey: "fastingTargetHours")
+        let hours = target > 0 ? Double(target) : 21.0
+        guard elapsedHours >= 18 && elapsedHours < hours else { return nil }
+        let ud = UserDefaults.standard
+        let openHour   = ud.object(forKey: "mealWindowOpenHour")   != nil ? ud.integer(forKey: "mealWindowOpenHour")   : 13
+        let openMinute = ud.object(forKey: "mealWindowOpenMinute") != nil ? ud.integer(forKey: "mealWindowOpenMinute") : 0
+        let timeStr = openMinute == 0 ? "\(openHour % 12 == 0 ? 12 : openHour % 12) \(openHour < 12 ? "AM" : "PM")" : "\(openHour % 12 == 0 ? 12 : openHour % 12):\(String(format: "%02d", openMinute)) \(openHour < 12 ? "AM" : "PM")"
+        return "You're in the optimal fat-burning window. Open your eating window at \(timeStr)."
     }
 
     // MARK: - Actions

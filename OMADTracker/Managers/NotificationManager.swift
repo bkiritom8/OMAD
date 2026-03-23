@@ -45,6 +45,13 @@ class NotificationManager: ObservableObject {
         let content = UNMutableNotificationContent()
         content.sound = .default
 
+        let ud = UserDefaults.standard
+        let openHour    = ud.object(forKey: "mealWindowOpenHour")    != nil ? ud.integer(forKey: "mealWindowOpenHour")    : 13
+        let openMinute  = ud.object(forKey: "mealWindowOpenMinute")  != nil ? ud.integer(forKey: "mealWindowOpenMinute")  : 0
+        let closeHour   = ud.object(forKey: "mealWindowCloseHour")   != nil ? ud.integer(forKey: "mealWindowCloseHour")   : 14
+        let closeMinute = ud.object(forKey: "mealWindowCloseMinute") != nil ? ud.integer(forKey: "mealWindowCloseMinute") : 0
+        let waterTarget = ud.object(forKey: "dailyWaterTargetMl")    != nil ? ud.integer(forKey: "dailyWaterTargetMl")    : 2500
+
         var hour = 12
         var minute = 0
 
@@ -52,22 +59,28 @@ class NotificationManager: ObservableObject {
         case .mealPrep:
             content.title = "Time to prep your OMAD meal 🍱"
             content.body  = "Today is \(Date().displayDayName) — get ready!"
-            hour = 12; minute = 30
+            // 30 min before window opens
+            let prepTotal = openHour * 60 + openMinute - 30
+            hour = max(0, prepTotal / 60); minute = ((prepTotal % 60) + 60) % 60
         case .eatingOpen:
             content.title = "Eating window open 🥗"
             content.body  = "Enjoy your OMAD meal!"
-            hour = 13; minute = 0
+            hour = openHour; minute = openMinute
         case .eatingClose:
             content.title = "Eating window closing soon ⏰"
-            content.body  = "Wrap up your meal — window closes at 2 PM."
-            hour = 14; minute = 0
+            let fmt = DateFormatter()
+            fmt.dateFormat = "h:mm a"
+            var comps = DateComponents(); comps.hour = closeHour; comps.minute = closeMinute
+            let closeStr = (Calendar.current.date(from: comps).map { fmt.string(from: $0) }) ?? "\(closeHour):00"
+            content.body  = "Wrap up your meal — window closes at \(closeStr)."
+            hour = closeHour; minute = closeMinute
         case .logWeight:
             content.title = "Log your weight for today 📊"
             content.body  = "Keep your streak going!"
             hour = 20; minute = 0
         case .waterCheck:
             content.title = "Have you hit your water goal? 💧"
-            content.body  = "2500 ml target — tap to check progress."
+            content.body  = "\(waterTarget) ml target — tap to check progress."
             hour = 21; minute = 0
         }
 

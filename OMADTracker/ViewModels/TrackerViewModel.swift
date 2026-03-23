@@ -2,8 +2,14 @@ import Foundation
 import SwiftData
 
 class TrackerViewModel: ObservableObject {
-    let startWeight: Double = 82.0
-    let goalWeight:  Double = 79.0
+    var startWeight: Double {
+        let v = UserDefaults.standard.double(forKey: "startWeightKg")
+        return v > 0 ? v : 82.0
+    }
+    var goalWeight: Double {
+        let v = UserDefaults.standard.double(forKey: "goalWeightKg")
+        return v > 0 ? v : 79.0
+    }
     let programDays: Int   = 28
     /// Fixed daily deficit assuming full activity (gym 400 + walks 150 = 550 kcal exercise)
     let baseDeficit: Int   = 820

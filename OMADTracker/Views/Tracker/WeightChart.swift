@@ -5,6 +5,9 @@ struct WeightChart: View {
     let entries: [WeightEntry]
     var planStartDate: Date = Date()
 
+    @AppStorage("startWeightKg") private var startWeightKg: Double = 82.0
+    @AppStorage("goalWeightKg")  private var goalWeightKg: Double  = 79.0
+
     private var planEndDate: Date {
         Calendar.current.date(byAdding: .day, value: 28, to: planStartDate) ?? planStartDate
     }
@@ -23,30 +26,30 @@ struct WeightChart: View {
             .frame(height: 220)
         } else {
             Chart {
-                // Reference line: start weight 82kg
-                RuleMark(y: .value("Start", 82.0))
+                // Reference line: start weight
+                RuleMark(y: .value("Start", startWeightKg))
                     .foregroundStyle(Color.gray.opacity(0.5))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 3]))
                     .annotation(position: .leading, alignment: .center) {
-                        Text("82")
+                        Text(String(format: "%.0f", startWeightKg))
                             .font(.caption2)
                             .foregroundStyle(.gray)
                     }
 
-                // Reference line: goal weight 79kg
-                RuleMark(y: .value("Goal", 79.0))
+                // Reference line: goal weight
+                RuleMark(y: .value("Goal", goalWeightKg))
                     .foregroundStyle(Color.primaryGreen.opacity(0.7))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 3]))
                     .annotation(position: .leading, alignment: .center) {
-                        Text("79")
+                        Text(String(format: "%.0f", goalWeightKg))
                             .font(.caption2)
                             .foregroundStyle(Color.primaryGreen)
                     }
 
-                // Projection line: 82kg at start → 79kg at day 28
+                // Projection line: start → goal over 28 days
                 LineMark(
                     x: .value("Date", planStartDate, unit: .day),
-                    y: .value("Weight", 82.0),
+                    y: .value("Weight", startWeightKg),
                     series: .value("Series", "projection")
                 )
                 .foregroundStyle(Color.orange.opacity(0.5))
@@ -54,7 +57,7 @@ struct WeightChart: View {
 
                 LineMark(
                     x: .value("Date", planEndDate, unit: .day),
-                    y: .value("Weight", 79.0),
+                    y: .value("Weight", goalWeightKg),
                     series: .value("Series", "projection")
                 )
                 .foregroundStyle(Color.orange.opacity(0.5))
@@ -78,7 +81,7 @@ struct WeightChart: View {
                     .symbolSize(40)
                 }
             }
-            .chartYScale(domain: 76...85)
+            .chartYScale(domain: (goalWeightKg - 3)...(startWeightKg + 3))
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 6)) { _ in
                     AxisGridLine()
