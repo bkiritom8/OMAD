@@ -80,18 +80,9 @@ struct WeightChart: View {
             }
             .chartYScale(domain: 76...85)
             .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: 6)) { value in
+                AxisMarks(values: .automatic(desiredCount: 6)) { _ in
                     AxisGridLine()
-                    AxisValueLabel {
-                        if let date = value.as(Date.self) {
-                            let formatter = DateFormatter()
-                            formatter.dateFormat = "MMM d"
-                            Text(formatter.string(from: date))
-                                .font(.caption2)
-                                .rotationEffect(.degrees(-45))
-                                .fixedSize()
-                        }
-                    }
+                    AxisValueLabel(format: Date.FormatStyle().month(.abbreviated).day())
                 }
             }
             .chartYAxis {
