@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     let onComplete: () -> Void
+    @EnvironmentObject private var healthManager: HealthManager
     @State private var page = 0
 
     var body: some View {
@@ -126,46 +127,56 @@ struct OnboardingView: View {
         .padding(.bottom, 40)
     }
 
-    // MARK: Screen 4 — Notifications
+    // MARK: Screen 4 — Permissions
 
     private var screen4: some View {
-        VStack(spacing: 28) {
+        VStack(spacing: 24) {
             Spacer()
 
             ZStack {
                 Circle()
                     .fill(Color.primaryGreen.opacity(0.15))
                     .frame(width: 120, height: 120)
-                Image(systemName: "bell.badge.fill")
+                Image(systemName: "checkmark.shield.fill")
                     .font(.system(size: 52))
                     .foregroundStyle(Color.primaryGreen)
             }
 
             VStack(spacing: 10) {
-                Text("Stay on Track")
+                Text("Allow Permissions")
                     .font(.title2.weight(.bold))
                     .multilineTextAlignment(.center)
-                Text("Get reminders for your eating window, weigh-ins, and water goal.")
+                Text("OMAD Tracker needs two permissions to work fully.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
 
-            VStack(alignment: .leading, spacing: 10) {
-                featureRow(icon: "bell.fill",      text: "12:30 PM — Prep your meal")
-                featureRow(icon: "fork.knife",     text: "1:00 PM — Eating window opens")
-                featureRow(icon: "timer",          text: "2:00 PM — Window closing")
-                featureRow(icon: "scalemass",      text: "8:00 PM — Log your weight")
-                featureRow(icon: "drop.fill",      text: "9:00 PM — Water goal check")
+            VStack(alignment: .leading, spacing: 16) {
+                permissionRow(
+                    icon: "heart.fill",
+                    color: .red,
+                    title: "Apple Health",
+                    detail: "Reads your workouts and activity to calculate your calorie deficit automatically."
+                )
+                permissionRow(
+                    icon: "bell.badge.fill",
+                    color: Color.primaryGreen,
+                    title: "Notifications",
+                    detail: "Reminds you at 12:30 PM to prep, 1 PM eating window, 2 PM close, 8 PM weigh-in, 9 PM water check."
+                )
             }
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 32)
 
             Spacer()
 
             VStack(spacing: 12) {
-                Button("Allow Notifications") {
-                    onComplete()
+                Button("Allow Permissions") {
+                    Task {
+                        await healthManager.requestHealthKitPermission()
+                        onComplete()
+                    }
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color.primaryGreen)
@@ -174,13 +185,32 @@ struct OnboardingView: View {
                 .padding(.horizontal, 32)
 
                 Button("Skip for Now") {
-                    UserDefaults.standard.set(true, forKey: "onboardingComplete")
                     onComplete()
                 }
                 .foregroundStyle(.secondary)
                 .font(.subheadline)
             }
             .padding(.bottom, 40)
+        }
+    }
+
+    private func permissionRow(icon: String, color: Color, title: String, detail: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.15))
+                    .frame(width: 44, height: 44)
+                Image(systemName: icon)
+                    .foregroundStyle(color)
+            }
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
         }
     }
 
