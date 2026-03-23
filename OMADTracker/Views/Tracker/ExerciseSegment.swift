@@ -18,6 +18,7 @@ struct ExerciseSegment: View {
 
     @AppStorage("autoSyncHealth")   private var autoSyncHealth   = true
     @AppStorage("showHealthBadges") private var showHealthBadges = true
+    @State private var isSyncing = false
 
     let exerciseTypes = ["Walking", "Gym", "Yoga", "Other"]
 
@@ -353,6 +354,9 @@ struct ExerciseSegment: View {
     // MARK: - Sync logic
 
     private func syncFromHealth() async {
+        guard !isSyncing else { return }
+        isSyncing = true
+        defer { isSyncing = false }
         let granted = await healthManager.requestHealthKitPermission()
         guard granted else {
             showHealthDeniedAlert = true
@@ -367,6 +371,9 @@ struct ExerciseSegment: View {
     }
 
     private func autoSyncFromHealth() async {
+        guard !isSyncing else { return }
+        isSyncing = true
+        defer { isSyncing = false }
         let workouts = await healthManager.fetchTodaysWorkouts()
         let newCount = await insertNewWorkouts(from: workouts)
         if newCount > 0 {

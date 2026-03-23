@@ -150,11 +150,12 @@ struct TodayView: View {
 
     @ViewBuilder
     private var calorieLimitBanner: some View {
-        if loggedCalories > 1680 {
+        let limit = Int(vm.calorieTarget)
+        if loggedCalories > vm.calorieTarget {
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.white)
-                Text("Over daily limit — \(Int(loggedCalories - 1680)) kcal over")
+                Text("Over \(limit) kcal limit — \(Int(loggedCalories - vm.calorieTarget)) kcal over")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.white)
                 Spacer()
@@ -163,11 +164,11 @@ struct TodayView: View {
             .background(Color.red)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .padding(.horizontal)
-        } else if loggedCalories >= 1580 {
+        } else if loggedCalories >= vm.calorieTarget - 100 {
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.circle.fill")
                     .foregroundStyle(.white)
-                Text("Approaching limit — \(Int(1680 - loggedCalories)) kcal remaining")
+                Text("Almost at \(limit) kcal limit — \(Int(vm.calorieTarget - loggedCalories)) kcal left")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.white)
                 Spacer()
@@ -331,17 +332,32 @@ struct TodayView: View {
             }
             .frame(height: 10)
 
-            // Quick add button
-            Button {
-                vm.addWater(250, existingEntry: todayWaterEntry, modelContext: modelContext)
-            } label: {
-                Label("+250 ml", systemImage: "plus")
-                    .font(.subheadline.weight(.medium))
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(Color.blue.opacity(0.12))
-                    .foregroundStyle(.blue)
-                    .clipShape(Capsule())
+            // Quick add buttons
+            HStack(spacing: 10) {
+                Button {
+                    vm.addWater(250, existingEntry: todayWaterEntry, modelContext: modelContext)
+                } label: {
+                    Label("+250 ml", systemImage: "plus")
+                        .font(.subheadline.weight(.medium))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.blue.opacity(0.12))
+                        .foregroundStyle(.blue)
+                        .clipShape(Capsule())
+                }
+
+                Button {
+                    // 8 fl oz = 237 ml
+                    vm.addWater(237, existingEntry: todayWaterEntry, modelContext: modelContext)
+                } label: {
+                    Label("+8 fl oz", systemImage: "plus")
+                        .font(.subheadline.weight(.medium))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.blue.opacity(0.12))
+                        .foregroundStyle(.blue)
+                        .clipShape(Capsule())
+                }
             }
         }
         .padding(14)

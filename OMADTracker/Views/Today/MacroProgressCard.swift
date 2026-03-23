@@ -64,8 +64,8 @@ struct MacroProgressCard: View {
 
             if isCalories {
                 Text(logged > target
-                     ? "\(Int(logged - target))\(unit) over limit"
-                     : "\(Int(target - logged))\(unit) remaining")
+                     ? "\(Int(logged - target))\(unit) over \(Int(target))\(unit) limit"
+                     : "\(Int(target - logged))\(unit) left · \(Int(target))\(unit) daily limit")
                     .font(.caption2)
                     .foregroundStyle(logged >= target ? .red : barColor)
             } else {
