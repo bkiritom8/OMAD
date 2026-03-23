@@ -17,12 +17,18 @@ struct OMADTrackerApp: App {
                         UserDefaults.standard.set(true, forKey: "onboardingComplete")
                         showOnboarding = false
                         guard requestPermissions else { return }
-                        // Request permissions after the sheet finishes dismissing
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                            NotificationManager.shared.requestPermission { granted in
-                                if granted { NotificationManager.shared.scheduleAll() }
+                        // Wait for sheet to dismiss, then request permissions sequentially
+                        Task {
+                            try? await Task.sleep(nanoseconds: 700_000_000)
+                            // HealthKit first — must complete before notifications dialog
+                            await healthManager.requestHealthKitPermission()
+                            // Then notifications
+                            await withCheckedContinuation { continuation in
+                                NotificationManager.shared.requestPermission { granted in
+                                    if granted { NotificationManager.shared.scheduleAll() }
+                                    continuation.resume()
+                                }
                             }
-                            Task { await healthManager.requestHealthKitPermission() }
                         }
                     }
                 }
