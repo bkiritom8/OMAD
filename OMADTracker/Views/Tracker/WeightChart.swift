@@ -82,15 +82,16 @@ struct WeightChart: View {
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 6)) { value in
                     AxisGridLine()
-                    AxisValueLabel(anchor: .topTrailing) {
+                    AxisValueLabel {
                         if let date = value.as(Date.self) {
                             let formatter = DateFormatter()
                             formatter.dateFormat = "MMM d"
                             Text(formatter.string(from: date))
                                 .font(.caption2)
+                                .rotationEffect(.degrees(-45))
+                                .fixedSize()
                         }
                     }
-                    .rotationEffect(.degrees(-45))
                 }
             }
             .chartYAxis {

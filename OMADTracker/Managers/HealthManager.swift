@@ -119,7 +119,7 @@ class HealthManager: ObservableObject {
     }
 
     #if canImport(HealthKit)
-    private static func mapWorkoutType(_ type: HKWorkoutActivityType) -> String {
+    private nonisolated static func mapWorkoutType(_ type: HKWorkoutActivityType) -> String {
         switch type {
         case .running, .walking:
             return "Walking"
