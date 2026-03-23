@@ -13,14 +13,17 @@ struct OMADTrackerApp: App {
                 .environmentObject(fastingManager)
                 .environmentObject(healthManager)
                 .sheet(isPresented: $showOnboarding) {
-                    OnboardingView {
-                        NotificationManager.shared.requestPermission { granted in
-                            if granted {
-                                NotificationManager.shared.scheduleAll()
-                            }
-                        }
+                    OnboardingView { requestPermissions in
                         UserDefaults.standard.set(true, forKey: "onboardingComplete")
                         showOnboarding = false
+                        guard requestPermissions else { return }
+                        // Request permissions after the sheet finishes dismissing
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            NotificationManager.shared.requestPermission { granted in
+                                if granted { NotificationManager.shared.scheduleAll() }
+                            }
+                            Task { await healthManager.requestHealthKitPermission() }
+                        }
                     }
                 }
         }

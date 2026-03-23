@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    let onComplete: () -> Void
-    @EnvironmentObject private var healthManager: HealthManager
+    /// Called when the user finishes onboarding.
+    /// `requestPermissions` is true when the user tapped Allow, false for Skip.
+    let onComplete: (_ requestPermissions: Bool) -> Void
     @State private var page = 0
 
     var body: some View {
@@ -173,10 +174,7 @@ struct OnboardingView: View {
 
             VStack(spacing: 12) {
                 Button("Allow Permissions") {
-                    Task {
-                        await healthManager.requestHealthKitPermission()
-                        onComplete()
-                    }
+                    onComplete(true)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color.primaryGreen)
@@ -185,7 +183,7 @@ struct OnboardingView: View {
                 .padding(.horizontal, 32)
 
                 Button("Skip for Now") {
-                    onComplete()
+                    onComplete(false)
                 }
                 .foregroundStyle(.secondary)
                 .font(.subheadline)
@@ -282,5 +280,5 @@ struct OnboardingView: View {
 }
 
 #Preview {
-    OnboardingView(onComplete: {})
+    OnboardingView(onComplete: { _ in })
 }
