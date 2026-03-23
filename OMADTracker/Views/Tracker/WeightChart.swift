@@ -1,0 +1,117 @@
+import SwiftUI
+import Charts
+
+struct WeightChart: View {
+    let entries: [WeightEntry]
+    var planStartDate: Date = Date()
+
+    private var planEndDate: Date {
+        Calendar.current.date(byAdding: .day, value: 28, to: planStartDate) ?? planStartDate
+    }
+
+    var body: some View {
+        if entries.count < 3 {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.secondarySystemGroupedBackground))
+                Text("Add more weigh-ins to see your chart")
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding()
+            }
+            .frame(height: 220)
+        } else {
+            Chart {
+                // Reference line: start weight 82kg
+                RuleMark(y: .value("Start", 82.0))
+                    .foregroundStyle(Color.gray.opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 3]))
+                    .annotation(position: .leading, alignment: .center) {
+                        Text("82")
+                            .font(.caption2)
+                            .foregroundStyle(.gray)
+                    }
+
+                // Reference line: goal weight 79kg
+                RuleMark(y: .value("Goal", 79.0))
+                    .foregroundStyle(Color.primaryGreen.opacity(0.7))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 3]))
+                    .annotation(position: .leading, alignment: .center) {
+                        Text("79")
+                            .font(.caption2)
+                            .foregroundStyle(Color.primaryGreen)
+                    }
+
+                // Projection line: 82kg at start → 79kg at day 28
+                LineMark(
+                    x: .value("Date", planStartDate, unit: .day),
+                    y: .value("Weight", 82.0),
+                    series: .value("Series", "projection")
+                )
+                .foregroundStyle(Color.orange.opacity(0.5))
+                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
+
+                LineMark(
+                    x: .value("Date", planEndDate, unit: .day),
+                    y: .value("Weight", 79.0),
+                    series: .value("Series", "projection")
+                )
+                .foregroundStyle(Color.orange.opacity(0.5))
+                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
+
+                // Actual weight line + points
+                ForEach(entries.sorted(by: { $0.date < $1.date })) { entry in
+                    LineMark(
+                        x: .value("Date", entry.date, unit: .day),
+                        y: .value("Weight", entry.weightKg),
+                        series: .value("Series", "actual")
+                    )
+                    .foregroundStyle(Color.primaryGreen)
+                    .interpolationMethod(.catmullRom)
+
+                    PointMark(
+                        x: .value("Date", entry.date, unit: .day),
+                        y: .value("Weight", entry.weightKg)
+                    )
+                    .foregroundStyle(Color.primaryGreen)
+                    .symbolSize(40)
+                }
+            }
+            .chartYScale(domain: 76...85)
+            .chartXAxis {
+                AxisMarks(values: .automatic(desiredCount: 6)) { value in
+                    AxisGridLine()
+                    AxisValueLabel(anchor: .topTrailing) {
+                        if let date = value.as(Date.self) {
+                            let formatter = DateFormatter()
+                            formatter.dateFormat = "MMM d"
+                            Text(formatter.string(from: date))
+                                .font(.caption2)
+                        }
+                    }
+                    .rotationEffect(.degrees(-45))
+                }
+            }
+            .chartYAxis {
+                AxisMarks(position: .trailing) { value in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let kg = value.as(Double.self) {
+                            Text("\(Int(kg))kg")
+                                .font(.caption2)
+                        }
+                    }
+                }
+            }
+            .frame(height: 220)
+            .padding(.bottom, 40)
+            .clipped()
+        }
+    }
+}
+
+#Preview {
+    WeightChart(entries: [], planStartDate: Date())
+        .padding()
+}
