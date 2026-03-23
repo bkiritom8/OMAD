@@ -125,10 +125,10 @@ class HealthManager: ObservableObject {
             return "Walking"
         case .traditionalStrengthTraining, .functionalStrengthTraining, .crossTraining:
             return "Gym"
-        case .yoga:
-            return "Yoga"
+        case .cycling:
+            return "Cycling"
         default:
-            return "Other"
+            return "Walking"
         }
     }
     #endif

@@ -57,10 +57,10 @@ class TrackerViewModel: ObservableObject {
 
     func caloriesPerMinute(for type: String) -> Int {
         switch type {
-        case "Walking": return 5
-        case "Gym":     return 7
-        case "Yoga":    return 3
-        default:        return 4
+        case "Walking":  return 5
+        case "Gym":      return 7
+        case "Cycling":  return 8
+        default:         return 5
         }
     }
 

@@ -20,7 +20,7 @@ struct ExerciseSegment: View {
     @AppStorage("showHealthBadges") private var showHealthBadges = true
     @State private var isSyncing = false
 
-    let exerciseTypes = ["Walking", "Gym", "Yoga", "Other"]
+    let exerciseTypes = ["Walking", "Gym", "Cycling"]
 
     private var previewBurn: Int { vm.caloriesPerMinute(for: selectedType) * durationMinutes }
     private var todayBurn: Int   { vm.todayExerciseCalories(entries: exerciseEntries) }
@@ -52,7 +52,7 @@ struct ExerciseSegment: View {
                         Button {
                             Task { await syncFromHealth() }
                         } label: {
-                            Label("Sync from Health", systemImage: "heart.fill")
+                            Label("Sync Health & Fitness", systemImage: "heart.fill")
                                 .font(.subheadline.weight(.medium))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
@@ -317,18 +317,22 @@ struct ExerciseSegment: View {
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
                                 }
+                                Button {
+                                    modelContext.delete(entry)
+                                    try? modelContext.save()
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .font(.caption)
+                                        .foregroundStyle(.red.opacity(0.7))
+                                        .padding(.leading, 8)
+                                }
+                                .buttonStyle(.plain)
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
                             .background(Color(.secondarySystemGroupedBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                             .padding(.horizontal)
-                        }
-                        .onDelete { indexSet in
-                            for i in indexSet {
-                                modelContext.delete(thisWeekEntries[i])
-                            }
-                            try? modelContext.save()
                         }
                     }
                 }
